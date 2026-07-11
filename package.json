@@ -1,0 +1,176 @@
+{
+  "name": "vscode-cdn-extension",
+  "displayName": "CDN (CBOR-EDN)",
+  "version": "0.1.0",
+  "description": "Language support for CDN (CBOR-EDN): syntax highlighting, validation, and formatting.",
+  "keywords": [
+    "cbor",
+    "cdn",
+    "cbor-edn",
+    "diagnostic-notation",
+    "edn"
+  ],
+  "publisher": "cbortech",
+  "homepage": "https://github.com/cbortech/vscode-cdn-extension#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cbortech/vscode-cdn-extension.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cbortech/vscode-cdn-extension/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "Yasuhiro Kudo <ykudo@ykudo.org>",
+  "type": "module",
+  "main": "./dist/extension.cjs",
+  "engines": {
+    "node": ">=20",
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Formatters",
+    "Linters"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "cdn",
+        "aliases": [
+          "CDN",
+          "CBOR Diagnostic Notation",
+          "cbor-edn"
+        ],
+        "extensions": [
+          ".cdn",
+          ".diag"
+        ],
+        "mimetypes": [
+          "application/cdn"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "cdn",
+        "scopeName": "source.cdn",
+        "path": "./syntaxes/cdn.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "title": "CDN",
+      "properties": {
+        "cdn.validate.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable CDN validation (diagnostics)."
+        },
+        "cdn.validate.topLevel": {
+          "type": "string",
+          "enum": [
+            "item",
+            "sequence"
+          ],
+          "enumDescriptions": [
+            "The document must contain exactly one CDN data item (matches the application/cdn media type).",
+            "The document may contain multiple CDN data items separated by whitespace or commas (CBOR sequence)."
+          ],
+          "default": "item",
+          "description": "How the top level of a CDN document is validated and formatted."
+        },
+        "cdn.format.commas": {
+          "type": "string",
+          "enum": [
+            "comma",
+            "none",
+            "trailing"
+          ],
+          "enumDescriptions": [
+            "Emit commas between elements: [1, 2, 3]",
+            "Omit commas, separate with spaces: [1 2 3]",
+            "Emit commas including a trailing comma"
+          ],
+          "default": "comma",
+          "description": "Comma style used by the formatter for arrays and maps."
+        },
+        "cdn.format.comments": {
+          "type": "string",
+          "enum": [
+            "preserve",
+            "c-style",
+            "cdn-style",
+            "strip"
+          ],
+          "enumDescriptions": [
+            "Keep comments with their original markers.",
+            "Normalize line comments to // and block comments to /* … */.",
+            "Normalize line comments to # and block comments to / … /.",
+            "Remove all comments."
+          ],
+          "default": "preserve",
+          "description": "How the formatter handles comments."
+        },
+        "cdn.format.encodingIndicators": {
+          "type": "string",
+          "enum": [
+            "always",
+            "auto",
+            "never"
+          ],
+          "default": "auto",
+          "description": "Whether the formatter emits CBOR encoding-width indicators (_N)."
+        },
+        "cdn.format.appStrings": {
+          "type": "boolean",
+          "default": true,
+          "description": "Prefer application-oriented literal notation (e.g. dt'2023-01-01T00:00:00Z') over raw tag notation when formatting."
+        },
+        "cdn.format.bstrEncoding": {
+          "type": "string",
+          "enum": [
+            "hex",
+            "base64",
+            "base64url"
+          ],
+          "default": "hex",
+          "description": "Fallback byte-string encoding used by the formatter when the original spelling is not preserved."
+        },
+        "cdn.format.preserveByteString": {
+          "type": "boolean",
+          "default": true,
+          "description": "Keep the original spelling of byte-string literals (h'…', b64'…', '…') when formatting."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "watch": "vite build --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "node -e \"['dist','coverage'].forEach(d=>require('fs').rmSync(d,{recursive:true,force:true}))\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "package": "npm run build && vsce package --no-dependencies",
+    "vscode:prepublish": "npm run build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@cbortech/cbor": "^0.26.2",
+    "@cbortech/hash-extension": "^0.2.3",
+    "@cbortech/set-map-extensions": "^0.1.0",
+    "@cbortech/uuid-extension": "^0.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/vscode": "^1.125.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "@vscode/vsce": "^3.9.2",
+    "prettier": "^3.9.4",
+    "typescript": "^5.9.3",
+    "vite": "^8.1.3",
+    "vitest": "^4.1.10"
+  }
+}

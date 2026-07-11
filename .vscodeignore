@@ -1,0 +1,14 @@
+.vscode/**
+.vscode-test/**
+src/**
+node_modules/**
+coverage/**
+samples/**
+dist/**/*.map
+tsconfig.json
+vite.config.ts
+.prettierrc.json
+.prettierignore
+.gitignore
+delete-refs.sh
+**/*.test.ts

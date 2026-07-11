@@ -1,0 +1,21 @@
+# CDN (Concise Diagnostic Notation) sample — draft-ietf-cbor-edn-literals
+{
+  / message header / 1: "hello",
+  "count": 42,
+  "hex": 0x2a,
+  "float": 1.5,
+  "half": 0x1.8p+0_1,
+  "flags": [true, false, null, undefined],
+  "simple": simple(16),
+  "bytes": h'deadbeef',
+  "spaced": h'dead beef # comment inside hex
+              cafe',
+  "base64": b64'aGVsbG8gd29ybGQ=',
+  "printable": 'hello',
+  "tagged": 1(1700000000),
+  "date": dt'2023-01-01T12:00:00Z',
+  "embedded": << 1, "two", [3] >>,
+  "concat": "long string " + "made of parts",
+  "indefinite": [_ 1, 2, 3],
+  "elided": [1, ..., 100]  // C-style comment
+} /* trailing block comment */

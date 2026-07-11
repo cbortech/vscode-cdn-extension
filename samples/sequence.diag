@@ -1,0 +1,4 @@
+# A CBOR sequence: set "cdn.validate.topLevel": "sequence" for this file.
+{"first": 1}
+{"second": h'0102'}
+"third"
