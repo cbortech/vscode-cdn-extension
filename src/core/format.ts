@@ -6,10 +6,11 @@
  * bytes (and keeps at least as many comments) before returning it. On any
  * doubt it returns `null`, which the extension surfaces as "no edits".
  */
-import { CBOR, type ToCDNOptions } from '@cbortech/cbor';
+import { CBOR, type FromCDNOptions, type ToCDNOptions } from '@cbortech/cbor';
 import type { CborItem } from '@cbortech/cbor/ast';
 import { tokenizeLenient } from '@cbortech/cbor/cdn';
 import type { TopLevelMode } from './diagnostics';
+import { resolveExtensions, type ExtensionSettings } from './extensions';
 
 export interface FormatSettings {
   topLevel: TopLevelMode;
@@ -21,12 +22,29 @@ export interface FormatSettings {
   appStrings: boolean;
   bstrEncoding: 'hex' | 'base64' | 'base64url';
   preserveByteString: boolean;
+  /** Keep `"a" + "b"` concatenation chains from the source. */
+  preserveConcatenation: boolean;
+  /** Split strings whose content parses as CDN, with structure-aware indent. */
+  splitCdn: boolean;
+  /** Split strings at newline characters using `+` concatenation. */
+  splitNewline: boolean;
+  /** Per-extension enable/disable state; missing entries mean enabled. */
+  extensions?: ExtensionSettings;
 }
 
 export function formatCdn(text: string, s: FormatSettings): string | null {
   if (text.trim() === '') return null;
 
   const preserveComments = s.comments !== 'strip';
+  const { builtinExtensions, extensions } = resolveExtensions(s.extensions);
+  // strict: any validity violation aborts formatting (throws).
+  const fromOptions: FromCDNOptions = {
+    strict: true,
+    silent: true,
+    preserveComments,
+    builtinExtensions,
+    extensions,
+  };
   const toOptions: ToCDNOptions = {
     indent: s.indent,
     preserveComments:
@@ -36,6 +54,9 @@ export function formatCdn(text: string, s: FormatSettings): string | null {
           ? false
           : s.comments,
     preserveByteString: s.preserveByteString,
+    preserveConcatenation: s.preserveConcatenation,
+    splitCdn: s.splitCdn,
+    splitNewline: s.splitNewline,
     commas: s.commas,
     encodingIndicators: s.encodingIndicators,
     appStrings: s.appStrings,
@@ -46,39 +67,24 @@ export function formatCdn(text: string, s: FormatSettings): string | null {
   try {
     formatted =
       s.topLevel === 'item'
-        ? formatItem(text, preserveComments, toOptions)
-        : formatSequence(text, preserveComments, toOptions);
+        ? CBOR.fromCDN(text, fromOptions).toCDN(toOptions)
+        : formatSequence(text, fromOptions, toOptions);
   } catch {
     return null;
   }
 
   if (!formatted.endsWith('\n')) formatted += '\n';
-  if (!verifyRoundTrip(text, formatted, s)) return null;
+  if (!verifyRoundTrip(text, formatted, s, { builtinExtensions, extensions }))
+    return null;
   return formatted;
-}
-
-function formatItem(
-  text: string,
-  preserveComments: boolean,
-  toOptions: ToCDNOptions
-): string {
-  // strict: any validity violation aborts formatting (throws).
-  const item = CBOR.fromCDN(text, {
-    strict: true,
-    silent: true,
-    preserveComments,
-  });
-  return item.toCDN(toOptions);
 }
 
 function formatSequence(
   text: string,
-  preserveComments: boolean,
+  fromOptions: FromCDNOptions,
   toOptions: ToCDNOptions
 ): string {
-  const items: CborItem[] = [
-    ...CBOR.fromCDNSeq(text, { strict: true, silent: true, preserveComments }),
-  ];
+  const items: CborItem[] = [...CBOR.fromCDNSeq(text, fromOptions)];
   if (items.length === 0) throw new Error('no items');
 
   const parts = items.map((item) => item.toCDN(toOptions));
@@ -86,7 +92,7 @@ function formatSequence(
   // fromCDNSeq drops comments that follow the last item on later lines
   // (they belong to no item). Re-attach them verbatim so formatting never
   // loses a comment.
-  if (preserveComments) {
+  if (fromOptions.preserveComments) {
     const lastEnd = items[items.length - 1].end ?? text.length;
     const tail = text.slice(lastEnd);
     const scan = tokenizeLenient(tail);
@@ -112,18 +118,24 @@ function formatSequence(
 function verifyRoundTrip(
   original: string,
   formatted: string,
-  s: FormatSettings
+  s: FormatSettings,
+  parseExtensions: Pick<FromCDNOptions, 'builtinExtensions' | 'extensions'>
 ): boolean {
   // Fixed options so the comparison is independent of the user's style
-  // settings; comments are stripped from the comparison on purpose.
+  // settings; comments are stripped from the comparison on purpose. Both
+  // sides must be parsed with the same extension set as the formatting pass,
+  // otherwise extension literals would compare as different node types.
   const canonicalOptions: ToCDNOptions = { encodingIndicators: 'always' };
+  const parseOptions: FromCDNOptions = {
+    strict: false,
+    silent: true,
+    ...parseExtensions,
+  };
   try {
     const canonicalOf = (text: string): string =>
       s.topLevel === 'item'
-        ? CBOR.fromCDN(text, { strict: false, silent: true }).toCDN(
-            canonicalOptions
-          )
-        : [...CBOR.fromCDNSeq(text, { strict: false, silent: true })]
+        ? CBOR.fromCDN(text, parseOptions).toCDN(canonicalOptions)
+        : [...CBOR.fromCDNSeq(text, parseOptions)]
             .map((item) => item.toCDN(canonicalOptions))
             .join(' ');
     if (canonicalOf(original) !== canonicalOf(formatted)) return false;

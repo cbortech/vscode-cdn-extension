@@ -140,6 +140,96 @@
           "type": "boolean",
           "default": true,
           "description": "Keep the original spelling of byte-string literals (h'…', b64'…', '…') when formatting."
+        },
+        "cdn.format.preserveConcatenation": {
+          "type": "boolean",
+          "default": true,
+          "description": "Keep `+` string concatenation chains (\"a\" + \"b\", h'01' + h'02') from the source instead of joining them into a single literal."
+        },
+        "cdn.format.splitCdn": {
+          "type": "boolean",
+          "default": false,
+          "description": "Split text strings whose content parses as CDN using `+` concatenation with structure-aware indentation."
+        },
+        "cdn.format.splitNewline": {
+          "type": "boolean",
+          "default": false,
+          "description": "Split text strings at newline characters using `+` concatenation."
+        },
+        "cdn.extensions.dt": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable dt'…'/DT'…' date-time literals (tags 1/0). Mandatory-to-implement per draft-ietf-cbor-edn-literals-26 §2.1."
+        },
+        "cdn.extensions.ip": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable ip'…'/IP'…' IP address/prefix literals (tags 52/54). Mandatory-to-implement per draft-ietf-cbor-edn-literals-26 §2.1."
+        },
+        "cdn.extensions.cri": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable cri'…'/CRI'…' Constrained Resource Identifier literals (tag 99)."
+        },
+        "cdn.extensions.t1": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable t1'…' interoperable text literals. Mandatory-to-implement per draft-ietf-cbor-edn-literals-26 §2.1."
+        },
+        "cdn.extensions.b1": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable b1'…' byte-string literals. Mandatory-to-implement per draft-ietf-cbor-edn-literals-26 §2.1."
+        },
+        "cdn.extensions.ilbs": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable ilbs'…' indefinite-length byte string literals."
+        },
+        "cdn.extensions.ilts": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable ilts'…' indefinite-length text string literals."
+        },
+        "cdn.extensions.float": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable float'…' floating-point literals."
+        },
+        "cdn.extensions.same": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable same'…' shared-value literals."
+        },
+        "cdn.extensions.b32": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable b32'…' base32 byte-string literals."
+        },
+        "cdn.extensions.h32": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable h32'…' base32hex byte-string literals."
+        },
+        "cdn.extensions.hash": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable hash'…' named-hash literals (@cbortech/hash-extension)."
+        },
+        "cdn.extensions.uuid": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable uuid'…'/UUID'…' UUID literals, tag 37 (@cbortech/uuid-extension)."
+        },
+        "cdn.extensions.set": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable SET<<[…]>> set literals, tag 258 (@cbortech/set-map-extensions)."
+        },
+        "cdn.extensions.map": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable MAP<<{…}>> map literals, tag 259 (@cbortech/set-map-extensions)."
         }
       }
     }

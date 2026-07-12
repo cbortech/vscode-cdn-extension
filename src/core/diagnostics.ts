@@ -4,7 +4,30 @@
  * source text; the extension layer converts them to editor positions.
  */
 import { CBOR, CdnSyntaxError, type ParseWarning } from '@cbortech/cbor';
+import {
+  CborArray,
+  CborEmbeddedCBOR,
+  CborIndefiniteByteString,
+  CborIndefiniteTextString,
+  CborMap,
+  CborTag,
+  CborTextString,
+  type CborItem,
+} from '@cbortech/cbor/ast';
 import { tokenizeLenient } from '@cbortech/cbor/cdn';
+import {
+  disabledExtensionForPrefix,
+  resolveExtensions,
+  type ExtensionSettings,
+} from './extensions';
+
+/**
+ * CBOR tag for an unrecognized CDN application extension (CPA999,
+ * draft-ietf-cbor-edn-literals §6.5). The parser wraps any app-string /
+ * app-sequence literal whose prefix has no matching extension in this tag
+ * instead of failing (`unresolvedExtension: 'cpa999'`, the default).
+ */
+const CPA999_TAG = 999n;
 
 export type TopLevelMode = 'item' | 'sequence';
 
@@ -25,7 +48,11 @@ export interface CdnDiagnostic {
  * - `sequence` mode: the document may contain any number of items separated
  *   by whitespace, commas, or comments.
  */
-export function validateCdn(text: string, mode: TopLevelMode): CdnDiagnostic[] {
+export function validateCdn(
+  text: string,
+  mode: TopLevelMode,
+  extensionSettings?: ExtensionSettings
+): CdnDiagnostic[] {
   // An empty / comments-only document produces no diagnostics: transient
   // states while typing should not be flagged as broken documents.
   const scan = tokenizeLenient(text);
@@ -35,18 +62,36 @@ export function validateCdn(text: string, mode: TopLevelMode): CdnDiagnostic[] {
   const onWarning = (w: ParseWarning): void => {
     diagnostics.push(warningToDiagnostic(w, text));
   };
+  const { builtinExtensions, extensions } =
+    resolveExtensions(extensionSettings);
+  const options = {
+    strict: false as const,
+    silent: true,
+    onWarning,
+    builtinExtensions,
+    extensions,
+  };
 
   try {
-    if (mode === 'item') {
-      CBOR.fromCDN(text, { strict: false, silent: true, onWarning });
-    } else {
-      // Drain the generator; diagnostics arrive through onWarning.
-      for (const item of CBOR.fromCDNSeq(text, {
-        strict: false,
-        silent: true,
-        onWarning,
-      })) {
-        void item;
+    const roots: CborItem[] =
+      mode === 'item'
+        ? [CBOR.fromCDN(text, options)]
+        : [...CBOR.fromCDNSeq(text, options)];
+
+    // Known extension prefixes that a user disabled but that the bundled
+    // @cbortech/cbor missing-extension hint table doesn't cover (e.g. `SET`
+    // / `MAP` from @cbortech/set-map-extensions) parse silently to an
+    // unresolved tag-999 node with no onWarning call. Walk the parsed tree
+    // to catch those; ranges already reported via onWarning (the extensions
+    // the library *does* know about) are skipped to avoid duplicates.
+    for (const root of roots) {
+      for (const d of collectDisabledExtensionDiagnostics(
+        root,
+        extensionSettings
+      )) {
+        if (!diagnostics.some((e) => e.start === d.start && e.end === d.end)) {
+          diagnostics.push(d);
+        }
       }
     }
   } catch (e) {
@@ -54,6 +99,62 @@ export function validateCdn(text: string, mode: TopLevelMode): CdnDiagnostic[] {
   }
 
   return dedupe(diagnostics);
+}
+
+/**
+ * Recursively find app-string / app-sequence literals that resolved to an
+ * unrecognized-extension (tag 999) node solely because their extension was
+ * disabled via `cdn.extensions.*`, and turn each into a diagnostic.
+ */
+function collectDisabledExtensionDiagnostics(
+  root: CborItem,
+  settings: ExtensionSettings | undefined
+): CdnDiagnostic[] {
+  const found: CdnDiagnostic[] = [];
+  const visit = (node: CborItem): void => {
+    if (node instanceof CborTag) {
+      if (
+        node.tag === CPA999_TAG &&
+        node.content instanceof CborArray &&
+        node.content.items[0] instanceof CborTextString &&
+        node.start !== undefined &&
+        node.end !== undefined
+      ) {
+        const prefix = node.content.items[0].value;
+        const name = disabledExtensionForPrefix(prefix, settings);
+        if (name !== undefined) {
+          found.push({
+            message: `app-string prefix '${prefix}' requires the '${name}' extension, which is disabled via the "cdn.extensions.${name}" setting`,
+            severity: 'warning',
+            start: node.start,
+            end: node.end,
+          });
+        }
+      }
+      visit(node.content);
+      return;
+    }
+    if (node instanceof CborArray || node instanceof CborEmbeddedCBOR) {
+      for (const item of node.items) visit(item);
+      return;
+    }
+    if (node instanceof CborMap) {
+      for (const [key, value] of node.entries) {
+        visit(key);
+        visit(value);
+      }
+      return;
+    }
+    if (
+      node instanceof CborIndefiniteByteString ||
+      node instanceof CborIndefiniteTextString
+    ) {
+      for (const chunk of node.chunks) visit(chunk);
+      return;
+    }
+  };
+  visit(root);
+  return found;
 }
 
 function warningToDiagnostic(w: ParseWarning, text: string): CdnDiagnostic {

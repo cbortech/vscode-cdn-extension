@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- Support all bundled @cbortech/cbor application extensions (`dt`, `ip`,
+  `cri`, `t1`, `b1`, `ilbs`, `ilts`, `float`, `same`, `b32`, `h32`) plus
+  `hash` (@cbortech/hash-extension), `uuid` (@cbortech/uuid-extension), and
+  `set` / `map` (@cbortech/set-map-extensions), each individually
+  configurable via `cdn.extensions.*` (all enabled by default).
+- New formatter settings `cdn.format.preserveConcatenation` (default on),
+  `cdn.format.splitCdn`, and `cdn.format.splitNewline`, replacing the
+  deprecated `textStringFormat` library option.
+
 ## 0.1.0
 
 Initial release.

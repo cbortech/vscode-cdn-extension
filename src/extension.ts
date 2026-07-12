@@ -5,10 +5,21 @@
  */
 import * as vscode from 'vscode';
 import { validateCdn, type TopLevelMode } from './core/diagnostics';
+import { EXTENSION_NAMES, type ExtensionSettings } from './core/extensions';
 import { formatCdn, type FormatSettings } from './core/format';
 
 const LANGUAGE_ID = 'cdn';
 const VALIDATE_DEBOUNCE_MS = 300;
+
+function readExtensionSettings(
+  config: vscode.WorkspaceConfiguration
+): ExtensionSettings {
+  const settings: ExtensionSettings = {};
+  for (const name of EXTENSION_NAMES) {
+    settings[name] = config.get<boolean>(`extensions.${name}`, true);
+  }
+  return settings;
+}
 
 export function activate(context: vscode.ExtensionContext): void {
   const collection = vscode.languages.createDiagnosticCollection(LANGUAGE_ID);
@@ -31,7 +42,11 @@ export function activate(context: vscode.ExtensionContext): void {
     }
     const mode = config.get<TopLevelMode>('validate.topLevel', 'item');
     const text = document.getText();
-    const diagnostics = validateCdn(text, mode).map((d) => {
+    const diagnostics = validateCdn(
+      text,
+      mode,
+      readExtensionSettings(config)
+    ).map((d) => {
       const range = new vscode.Range(
         document.positionAt(d.start),
         document.positionAt(d.end)
@@ -106,6 +121,13 @@ export function activate(context: vscode.ExtensionContext): void {
             'format.preserveByteString',
             true
           ),
+          preserveConcatenation: config.get<boolean>(
+            'format.preserveConcatenation',
+            true
+          ),
+          splitCdn: config.get<boolean>('format.splitCdn', false),
+          splitNewline: config.get<boolean>('format.splitNewline', false),
+          extensions: readExtensionSettings(config),
         };
         const text = document.getText();
         const formatted = formatCdn(text, settings);

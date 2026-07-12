@@ -10,6 +10,9 @@ const defaults: FormatSettings = {
   appStrings: true,
   bstrEncoding: 'hex',
   preserveByteString: true,
+  preserveConcatenation: true,
+  splitCdn: false,
+  splitNewline: false,
 };
 
 describe('formatCdn (item mode)', () => {
@@ -60,6 +63,37 @@ describe('formatCdn (item mode)', () => {
   it('formats documents containing ellipsis', () => {
     const out = formatCdn('[1, ..., 3]', defaults);
     expect(out).toBe('[\n  1,\n  ...,\n  3\n]\n');
+  });
+});
+
+describe('formatCdn (extension literals and string options)', () => {
+  it('formats extension literals with all extensions enabled by default', () => {
+    expect(
+      formatCdn("uuid'f81d4fae-7dec-11d0-a765-00a0c91e6bf6'", defaults)
+    ).toBe("uuid'f81d4fae-7dec-11d0-a765-00a0c91e6bf6'\n");
+    expect(formatCdn('SET<<[1, 2, 3]>>', defaults)).not.toBeNull();
+    expect(formatCdn('MAP<<{1: 2}>>', defaults)).not.toBeNull();
+    expect(formatCdn("b32'MZXW6==='", defaults)).not.toBeNull();
+  });
+
+  it('keeps + concatenation when preserveConcatenation is on', () => {
+    // With indent set, the serializer lays out each part on its own line.
+    expect(formatCdn('"a" + "b"', defaults)).toBe('"a" +\n  "b"\n');
+  });
+
+  it('joins + concatenation when preserveConcatenation is off', () => {
+    expect(
+      formatCdn('"a" + "b"', { ...defaults, preserveConcatenation: false })
+    ).toBe('"ab"\n');
+  });
+
+  it('splits strings at newlines when splitNewline is on', () => {
+    const out = formatCdn('"line1\\nline2"', {
+      ...defaults,
+      preserveConcatenation: false,
+      splitNewline: true,
+    });
+    expect(out).toBe('"line1\\n" +\n  "line2"\n');
   });
 });
 
