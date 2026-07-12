@@ -125,8 +125,8 @@ export function activate(context: vscode.ExtensionContext): void {
             'format.preserveConcatenation',
             true
           ),
-          splitCdn: config.get<boolean>('format.splitCdn', false),
-          splitNewline: config.get<boolean>('format.splitNewline', false),
+          splitCdn: config.get<boolean>('format.splitCdn', true),
+          splitNewline: config.get<boolean>('format.splitNewline', true),
           extensions: readExtensionSettings(config),
         };
         const text = document.getText();

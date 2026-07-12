@@ -43,10 +43,12 @@
         ],
         "extensions": [
           ".cdn",
-          ".diag"
+          ".diag",
+          ".edn"
         ],
         "mimetypes": [
-          "application/cdn"
+          "application/cdn",
+          "application/cbor-diagnostic"
         ],
         "configuration": "./language-configuration.json"
       }
@@ -148,12 +150,12 @@
         },
         "cdn.format.splitCdn": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Split text strings whose content parses as CDN using `+` concatenation with structure-aware indentation."
         },
         "cdn.format.splitNewline": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Split text strings at newline characters using `+` concatenation."
         },
         "cdn.extensions.dt": {
@@ -255,7 +257,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
-    "@types/vscode": "^1.125.0",
+    "@types/vscode": "^1.85.0",
     "@vitest/coverage-v8": "^4.1.10",
     "@vscode/vsce": "^3.9.2",
     "prettier": "^3.9.4",

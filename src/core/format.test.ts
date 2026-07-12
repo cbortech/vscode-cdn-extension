@@ -11,8 +11,8 @@ const defaults: FormatSettings = {
   bstrEncoding: 'hex',
   preserveByteString: true,
   preserveConcatenation: true,
-  splitCdn: false,
-  splitNewline: false,
+  splitCdn: true,
+  splitNewline: true,
 };
 
 describe('formatCdn (item mode)', () => {
