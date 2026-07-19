@@ -7,6 +7,8 @@ the human-readable text format for CBOR data and a superset of JSON.
 Powered by [@cbortech/cbor](https://www.npmjs.com/package/@cbortech/cbor), so
 highlighting, validation, and formatting agree exactly with a real CDN parser.
 
+![CDN syntax highlighting in Visual Studio Code](images/example-cdn.png)
+
 ## Features
 
 - **Syntax highlighting** for `.cdn`, `.diag`, and `.edn` files: numbers in all bases,
@@ -49,22 +51,6 @@ highlighting, validation, and formatting agree exactly with a real CDN parser.
 Note: `dt`, `ip`, `t1`, and `b1` are mandatory-to-implement per
 draft-ietf-cbor-edn-literals-26 §2.1; disabling them makes validation stricter
 than the spec recommends.
-
-## Development
-
-```bash
-npm install
-npm run build       # bundle dist/extension.cjs
-npm test            # unit tests for the validation/formatting core
-npm run typecheck
-```
-
-Press **F5** in VS Code to launch an Extension Development Host with the
-[samples/](samples/) folder open.
-
-```bash
-npm run package     # build a .vsix with vsce
-```
 
 ## License
 
