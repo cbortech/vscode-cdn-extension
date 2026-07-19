@@ -1,7 +1,7 @@
 {
   "name": "vscode-cdn-extension",
   "displayName": "CDN (CBOR-EDN)",
-  "version": "0.1.0",
+  "version": "0.26.5",
   "description": "Language support for CDN (CBOR-EDN): syntax highlighting, validation, and formatting.",
   "keywords": [
     "cbor",
@@ -23,6 +23,7 @@
   "author": "Yasuhiro Kudo <ykudo@ykudo.org>",
   "type": "module",
   "main": "./dist/extension.cjs",
+  "icon": "images/icon.png",
   "engines": {
     "node": ">=20",
     "vscode": "^1.85.0"
@@ -143,6 +144,11 @@
           "default": true,
           "description": "Keep the original spelling of byte-string literals (h'…', b64'…', '…') when formatting."
         },
+        "cdn.format.preserveRawString": {
+          "type": "boolean",
+          "default": true,
+          "description": "Keep the original spelling of raw backtick string literals (`…`) instead of converting them to double-quoted form."
+        },
         "cdn.format.preserveConcatenation": {
           "type": "boolean",
           "default": true,
@@ -157,6 +163,11 @@
           "type": "boolean",
           "default": true,
           "description": "Split text strings at newline characters using `+` concatenation."
+        },
+        "cdn.format.inlineLeafContainers": {
+          "type": "boolean",
+          "default": true,
+          "description": "Keep arrays/maps that contain no nested containers on a single line (e.g. [1, 2, 3]) when formatting."
         },
         "cdn.extensions.dt": {
           "type": "boolean",
@@ -250,14 +261,14 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@cbortech/cbor": "^0.26.2",
+    "@cbortech/cbor": "^0.26.5",
     "@cbortech/hash-extension": "^0.2.3",
     "@cbortech/set-map-extensions": "^0.1.0",
     "@cbortech/uuid-extension": "^0.3.3"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
-    "@types/vscode": "^1.85.0",
+    "@types/vscode": "1.85.0",
     "@vitest/coverage-v8": "^4.1.10",
     "@vscode/vsce": "^3.9.2",
     "prettier": "^3.9.4",

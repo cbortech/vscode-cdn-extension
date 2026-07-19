@@ -56,7 +56,9 @@ export function activate(context: vscode.ExtensionContext): void {
         d.message,
         d.severity === 'error'
           ? vscode.DiagnosticSeverity.Error
-          : vscode.DiagnosticSeverity.Warning
+          : d.severity === 'warning'
+            ? vscode.DiagnosticSeverity.Warning
+            : vscode.DiagnosticSeverity.Information
       );
       diagnostic.source = 'cdn';
       return diagnostic;
@@ -121,12 +123,20 @@ export function activate(context: vscode.ExtensionContext): void {
             'format.preserveByteString',
             true
           ),
+          preserveRawString: config.get<boolean>(
+            'format.preserveRawString',
+            true
+          ),
           preserveConcatenation: config.get<boolean>(
             'format.preserveConcatenation',
             true
           ),
           splitCdn: config.get<boolean>('format.splitCdn', true),
           splitNewline: config.get<boolean>('format.splitNewline', true),
+          inlineLeafContainers: config.get<boolean>(
+            'format.inlineLeafContainers',
+            true
+          ),
           extensions: readExtensionSettings(config),
         };
         const text = document.getText();

@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.26.5
+
+- Update `@cbortech/cbor` to 0.26.5.
+- New formatter setting `cdn.format.preserveRawString` (default on): keep the
+  original spelling of raw backtick string literals.
+- New formatter setting `cdn.format.inlineLeafContainers` (default on): keep
+  arrays/maps that contain no nested containers on a single line
+  (e.g. `[1, 2, 3]`).
+- Missing-extension hints (a known but disabled/unregistered extension prefix)
+  are now reported at Information severity instead of Warning; validity
+  violations remain warnings or errors.
 - Recognize `.edn` as a CDN file extension, alongside `.cdn` and `.diag`.
 - Support all bundled @cbortech/cbor application extensions (`dt`, `ip`,
   `cri`, `t1`, `b1`, `ilbs`, `ilts`, `float`, `same`, `b32`, `h32`) plus
