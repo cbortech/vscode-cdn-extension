@@ -7,6 +7,8 @@ the human-readable text format for CBOR data and a superset of JSON.
 Powered by [@cbortech/cbor](https://www.npmjs.com/package/@cbortech/cbor), so
 highlighting, validation, and formatting agree exactly with a real CDN parser.
 
+![CDN syntax highlighting in Visual Studio Code](images/example-cdn.png)
+
 ## Features
 
 - **Syntax highlighting** for `.cdn`, `.diag`, and `.edn` files: numbers in all bases,
@@ -39,30 +41,16 @@ highlighting, validation, and formatting agree exactly with a real CDN parser.
 | `cdn.format.appStrings`            | `true`       | Prefer `dt'…'`-style literals over raw tag notation.                                                                                                                                                                                               |
 | `cdn.format.bstrEncoding`          | `"hex"`      | Fallback byte-string encoding: `hex`, `base64`, `base64url`.                                                                                                                                                                                       |
 | `cdn.format.preserveByteString`    | `true`       | Keep the original spelling of byte-string literals.                                                                                                                                                                                                |
+| `cdn.format.preserveRawString`     | `true`       | Keep the original spelling of raw backtick string literals (`` `…` ``).                                                                                                                                                                            |
 | `cdn.format.preserveConcatenation` | `true`       | Keep `+` concatenation chains (`"a" + "b"`) from the source.                                                                                                                                                                                       |
 | `cdn.format.splitCdn`              | `true`       | Split text strings whose content parses as CDN, with structure-aware indentation.                                                                                                                                                                  |
 | `cdn.format.splitNewline`          | `true`       | Split text strings at newline characters using `+` concatenation.                                                                                                                                                                                  |
+| `cdn.format.inlineLeafContainers`  | `true`       | Keep arrays/maps with no nested containers on a single line (e.g. `[1, 2, 3]`).                                                                                                                                                                    |
 | `cdn.extensions.<name>`            | `true`       | Enable/disable each application extension individually: `dt`, `ip`, `cri`, `t1`, `b1`, `ilbs`, `ilts`, `float`, `same`, `b32`, `h32`, `hash`, `uuid`, `set`, `map`. Disabled prefixes are reported with a hint and parsed as unresolved (tag 999). |
 
 Note: `dt`, `ip`, `t1`, and `b1` are mandatory-to-implement per
 draft-ietf-cbor-edn-literals-26 §2.1; disabling them makes validation stricter
 than the spec recommends.
-
-## Development
-
-```bash
-npm install
-npm run build       # bundle dist/extension.cjs
-npm test            # unit tests for the validation/formatting core
-npm run typecheck
-```
-
-Press **F5** in VS Code to launch an Extension Development Host with the
-[samples/](samples/) folder open.
-
-```bash
-npm run package     # build a .vsix with vsce
-```
 
 ## License
 

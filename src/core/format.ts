@@ -14,7 +14,11 @@ import { resolveExtensions, type ExtensionSettings } from './extensions';
 
 export interface FormatSettings {
   topLevel: TopLevelMode;
-  /** Resolved indentation string, e.g. '  ' or '\t'. */
+  /**
+   * Resolved indentation string, e.g. '  ' or '\t'. An empty string yields
+   * single-line output (the serializer strips comments there, so documents
+   * with comments refuse to format unless `comments` is 'strip').
+   */
   indent: string;
   commas: 'comma' | 'none' | 'trailing';
   comments: 'preserve' | 'c-style' | 'cdn-style' | 'strip';
@@ -22,12 +26,16 @@ export interface FormatSettings {
   appStrings: boolean;
   bstrEncoding: 'hex' | 'base64' | 'base64url';
   preserveByteString: boolean;
+  /** Keep the original spelling of raw backtick string literals. */
+  preserveRawString: boolean;
   /** Keep `"a" + "b"` concatenation chains from the source. */
   preserveConcatenation: boolean;
   /** Split strings whose content parses as CDN, with structure-aware indent. */
   splitCdn: boolean;
   /** Split strings at newline characters using `+` concatenation. */
   splitNewline: boolean;
+  /** Keep containers without nested containers on one line, e.g. `[1, 2, 3]`. */
+  inlineLeafContainers: boolean;
   /** Per-extension enable/disable state; missing entries mean enabled. */
   extensions?: ExtensionSettings;
 }
@@ -54,9 +62,11 @@ export function formatCdn(text: string, s: FormatSettings): string | null {
           ? false
           : s.comments,
     preserveByteString: s.preserveByteString,
+    preserveRawString: s.preserveRawString,
     preserveConcatenation: s.preserveConcatenation,
     splitCdn: s.splitCdn,
     splitNewline: s.splitNewline,
+    inlineLeafContainers: s.inlineLeafContainers,
     commas: s.commas,
     encodingIndicators: s.encodingIndicators,
     appStrings: s.appStrings,
@@ -140,9 +150,15 @@ function verifyRoundTrip(
             .join(' ');
     if (canonicalOf(original) !== canonicalOf(formatted)) return false;
 
+    const commentCount = (text: string): number =>
+      tokenizeLenient(text).comments.length;
+    // Single-line output (empty indent) cannot carry comments at all — the
+    // serializer strips every one of them. Any comment in the source would be
+    // silently deleted, so refuse regardless of preserveByteString (whose only
+    // role in the check below is to excuse comments inside byte strings).
+    if (s.indent === '' && s.comments !== 'strip' && commentCount(original) > 0)
+      return false;
     if (s.comments === 'preserve' && s.preserveByteString) {
-      const commentCount = (text: string): number =>
-        tokenizeLenient(text).comments.length;
       if (commentCount(formatted) < commentCount(original)) return false;
     }
     return true;

@@ -33,7 +33,12 @@ export type TopLevelMode = 'item' | 'sequence';
 
 export interface CdnDiagnostic {
   message: string;
-  severity: 'error' | 'warning';
+  /**
+   * `info` marks an informational hint (`ParseWarning.hint`) — e.g. an
+   * app-string prefix matching a known but unregistered extension — rather
+   * than a validity violation.
+   */
+  severity: 'error' | 'warning' | 'info';
   /** Character offset of the start of the offending range. */
   start: number;
   /** Character offset just past the end of the offending range. */
@@ -125,7 +130,9 @@ function collectDisabledExtensionDiagnostics(
         if (name !== undefined) {
           found.push({
             message: `app-string prefix '${prefix}' requires the '${name}' extension, which is disabled via the "cdn.extensions.${name}" setting`,
-            severity: 'warning',
+            // Same class as the library's own missing-extension hints
+            // (ParseWarning.hint): informational, not a validity violation.
+            severity: 'info',
             start: node.start,
             end: node.end,
           });
@@ -166,7 +173,7 @@ function warningToDiagnostic(w: ParseWarning, text: string): CdnDiagnostic {
     : w.message;
   return {
     message,
-    severity: w.fatal ? 'error' : 'warning',
+    severity: w.fatal ? 'error' : w.hint ? 'info' : 'warning',
     ...resolveRange(text, w.offset, w.endOffset),
   };
 }

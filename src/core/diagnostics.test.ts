@@ -113,7 +113,7 @@ describe('validateCdn (extensions)', () => {
       { uuid: false }
     );
     expect(diags).toHaveLength(1);
-    expect(diags[0].severity).toBe('warning');
+    expect(diags[0].severity).toBe('info');
     expect(diags[0].message).toMatch(/requires an extension/);
   });
 
@@ -122,7 +122,7 @@ describe('validateCdn (extensions)', () => {
       dt: false,
     });
     expect(diags).toHaveLength(1);
-    expect(diags[0].severity).toBe('warning');
+    expect(diags[0].severity).toBe('info');
     expect(diags[0].message).toMatch(/builtinExtensions/);
   });
 
@@ -139,7 +139,7 @@ describe('validateCdn (extensions)', () => {
   it('hints when the set extension is disabled', () => {
     const diags = validateCdn('SET<<[1, 2, 3]>>', 'item', { set: false });
     expect(diags).toHaveLength(1);
-    expect(diags[0].severity).toBe('warning');
+    expect(diags[0].severity).toBe('info');
     expect(diags[0].message).toMatch(/'set' extension/);
     expect(diags[0].message).toMatch(/cdn\.extensions\.set/);
     expect(diags[0].start).toBe(0);
@@ -149,7 +149,7 @@ describe('validateCdn (extensions)', () => {
   it('hints when the map extension is disabled', () => {
     const diags = validateCdn('MAP<<{1: 2}>>', 'item', { map: false });
     expect(diags).toHaveLength(1);
-    expect(diags[0].severity).toBe('warning');
+    expect(diags[0].severity).toBe('info');
     expect(diags[0].message).toMatch(/'map' extension/);
   });
 
@@ -159,7 +159,7 @@ describe('validateCdn (extensions)', () => {
       map: false,
     });
     expect(diags).toHaveLength(2);
-    expect(diags.every((d) => d.severity === 'warning')).toBe(true);
+    expect(diags.every((d) => d.severity === 'info')).toBe(true);
   });
 
   it('does not duplicate a diagnostic already reported by the library hint', () => {
