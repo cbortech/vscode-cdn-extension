@@ -1,7 +1,7 @@
 {
   "name": "vscode-cdn-extension",
   "displayName": "CDN (CBOR-EDN)",
-  "version": "0.26.5",
+  "version": "0.26.7",
   "description": "Language support for CDN (CBOR-EDN): syntax highlighting, validation, and formatting.",
   "keywords": [
     "cbor",
@@ -149,6 +149,26 @@
           "default": true,
           "description": "Keep the original spelling of raw backtick string literals (`…`) instead of converting them to double-quoted form."
         },
+        "cdn.format.preserveTextString": {
+          "type": "boolean",
+          "default": true,
+          "description": "Keep the original spelling of double-quoted text string literals (escape sequences, quoting choices) when formatting."
+        },
+        "cdn.format.preserveNumberFormat": {
+          "type": "boolean",
+          "default": true,
+          "description": "Keep the original spelling of integer and floating-point literals (base, digit spelling, exponent form) when formatting."
+        },
+        "cdn.format.preserveAppSequence": {
+          "type": "boolean",
+          "default": true,
+          "description": "Keep the original notation (e.g. dt'…' vs DT<<…>> vs raw tag) of extension application literals instead of normalizing to prefix'…' form."
+        },
+        "cdn.format.preserveBlankLines": {
+          "type": "boolean",
+          "default": true,
+          "description": "Re-emit a blank line above an array/map entry that had one in the source, to preserve paragraph-like groupings."
+        },
         "cdn.format.preserveConcatenation": {
           "type": "boolean",
           "default": true,
@@ -261,7 +281,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@cbortech/cbor": "^0.26.5",
+    "@cbortech/cbor": "^0.26.7",
     "@cbortech/hash-extension": "^0.2.3",
     "@cbortech/set-map-extensions": "^0.1.0",
     "@cbortech/uuid-extension": "^0.3.3"
@@ -271,9 +291,9 @@
     "@types/vscode": "1.85.0",
     "@vitest/coverage-v8": "^4.1.10",
     "@vscode/vsce": "^3.9.2",
-    "prettier": "^3.9.4",
+    "prettier": "^3.9.6",
     "typescript": "^5.9.3",
-    "vite": "^8.1.3",
+    "vite": "^8.1.5",
     "vitest": "^4.1.10"
   }
 }

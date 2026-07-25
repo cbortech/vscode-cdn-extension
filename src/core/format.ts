@@ -28,6 +28,14 @@ export interface FormatSettings {
   preserveByteString: boolean;
   /** Keep the original spelling of raw backtick string literals. */
   preserveRawString: boolean;
+  /** Keep the original spelling of double-quoted text string literals. */
+  preserveTextString: boolean;
+  /** Keep the original spelling of integer and floating-point literals. */
+  preserveNumberFormat: boolean;
+  /** Keep the original notation (quoting/bracketing/raw tag) of extension application literals. */
+  preserveAppSequence: boolean;
+  /** Re-emit a blank line above an entry that had one in the source. */
+  preserveBlankLines: boolean;
   /** Keep `"a" + "b"` concatenation chains from the source. */
   preserveConcatenation: boolean;
   /** Split strings whose content parses as CDN, with structure-aware indent. */
@@ -63,6 +71,10 @@ export function formatCdn(text: string, s: FormatSettings): string | null {
           : s.comments,
     preserveByteString: s.preserveByteString,
     preserveRawString: s.preserveRawString,
+    preserveTextString: s.preserveTextString,
+    preserveNumberFormat: s.preserveNumberFormat,
+    preserveAppSequence: s.preserveAppSequence,
+    preserveBlankLines: s.preserveBlankLines,
     preserveConcatenation: s.preserveConcatenation,
     splitCdn: s.splitCdn,
     splitNewline: s.splitNewline,
@@ -158,7 +170,14 @@ function verifyRoundTrip(
     // role in the check below is to excuse comments inside byte strings).
     if (s.indent === '' && s.comments !== 'strip' && commentCount(original) > 0)
       return false;
-    if (s.comments === 'preserve' && s.preserveByteString) {
+    // Byte-string and app-sequence literals (e.g. h'…', DT<<…>>) can carry
+    // comments baked into their interior spelling; the comment is only
+    // guaranteed to survive when both the corresponding preserve* option and
+    // preserveComments are on, so only check comment counts in that case.
+    if (
+      s.comments === 'preserve' &&
+      (s.preserveByteString || s.preserveAppSequence)
+    ) {
       if (commentCount(formatted) < commentCount(original)) return false;
     }
     return true;

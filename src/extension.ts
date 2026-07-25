@@ -127,6 +127,22 @@ export function activate(context: vscode.ExtensionContext): void {
             'format.preserveRawString',
             true
           ),
+          preserveTextString: config.get<boolean>(
+            'format.preserveTextString',
+            true
+          ),
+          preserveNumberFormat: config.get<boolean>(
+            'format.preserveNumberFormat',
+            true
+          ),
+          preserveAppSequence: config.get<boolean>(
+            'format.preserveAppSequence',
+            true
+          ),
+          preserveBlankLines: config.get<boolean>(
+            'format.preserveBlankLines',
+            true
+          ),
           preserveConcatenation: config.get<boolean>(
             'format.preserveConcatenation',
             true
