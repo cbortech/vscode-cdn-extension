@@ -1,7 +1,7 @@
 {
   "name": "vscode-cdn-extension",
   "displayName": "CDN (CBOR-EDN)",
-  "version": "0.26.7",
+  "version": "0.26.8",
   "description": "Language support for CDN (CBOR-EDN): syntax highlighting, validation, and formatting.",
   "keywords": [
     "cbor",
@@ -149,11 +149,6 @@
           "default": true,
           "description": "Keep the original spelling of raw backtick string literals (`…`) instead of converting them to double-quoted form."
         },
-        "cdn.format.preserveTextString": {
-          "type": "boolean",
-          "default": true,
-          "description": "Keep the original spelling of double-quoted text string literals (escape sequences, quoting choices) when formatting."
-        },
         "cdn.format.preserveNumberFormat": {
           "type": "boolean",
           "default": true,
@@ -281,10 +276,10 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@cbortech/cbor": "^0.26.7",
+    "@cbortech/cbor": "^0.26.8",
     "@cbortech/hash-extension": "^0.2.3",
     "@cbortech/set-map-extensions": "^0.1.0",
-    "@cbortech/uuid-extension": "^0.3.3"
+    "@cbortech/uuid-extension": "^0.26.8"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

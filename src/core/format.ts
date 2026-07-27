@@ -28,8 +28,6 @@ export interface FormatSettings {
   preserveByteString: boolean;
   /** Keep the original spelling of raw backtick string literals. */
   preserveRawString: boolean;
-  /** Keep the original spelling of double-quoted text string literals. */
-  preserveTextString: boolean;
   /** Keep the original spelling of integer and floating-point literals. */
   preserveNumberFormat: boolean;
   /** Keep the original notation (quoting/bracketing/raw tag) of extension application literals. */
@@ -71,7 +69,6 @@ export function formatCdn(text: string, s: FormatSettings): string | null {
           : s.comments,
     preserveByteString: s.preserveByteString,
     preserveRawString: s.preserveRawString,
-    preserveTextString: s.preserveTextString,
     preserveNumberFormat: s.preserveNumberFormat,
     preserveAppSequence: s.preserveAppSequence,
     preserveBlankLines: s.preserveBlankLines,
