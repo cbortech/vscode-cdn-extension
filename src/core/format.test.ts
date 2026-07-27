@@ -11,7 +11,6 @@ const defaults: FormatSettings = {
   bstrEncoding: 'hex',
   preserveByteString: true,
   preserveRawString: true,
-  preserveTextString: true,
   preserveNumberFormat: true,
   preserveAppSequence: true,
   preserveBlankLines: true,
@@ -151,16 +150,6 @@ describe('formatCdn (extension literals and string options)', () => {
     ).toBe('"a \\"b\\" c"\n');
   });
 
-  it('keeps double-quoted string spelling when preserveTextString is on', () => {
-    expect(formatCdn('"\\u00e9"', defaults)).toBe('"\\u00e9"\n');
-  });
-
-  it('re-escapes double-quoted strings when preserveTextString is off', () => {
-    expect(
-      formatCdn('"\\u00e9"', { ...defaults, preserveTextString: false })
-    ).toBe('"é"\n');
-  });
-
   it('keeps number literal spelling when preserveNumberFormat is on', () => {
     expect(formatCdn('0x1A', defaults)).toBe('0x1A\n');
   });
@@ -202,7 +191,6 @@ describe('formatCdn (extension literals and string options)', () => {
     const out = formatCdn('"line1\\nline2"', {
       ...defaults,
       preserveConcatenation: false,
-      preserveTextString: false,
       splitNewline: true,
     });
     expect(out).toBe('"line1\\n" +\n  "line2"\n');

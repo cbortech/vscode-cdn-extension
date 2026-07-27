@@ -127,10 +127,6 @@ export function activate(context: vscode.ExtensionContext): void {
             'format.preserveRawString',
             true
           ),
-          preserveTextString: config.get<boolean>(
-            'format.preserveTextString',
-            true
-          ),
           preserveNumberFormat: config.get<boolean>(
             'format.preserveNumberFormat',
             true
