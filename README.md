@@ -6,6 +6,8 @@ the human-readable text format for CBOR data and a superset of JSON.
 
 Powered by [@cbortech/cbor](https://www.npmjs.com/package/@cbortech/cbor), so
 highlighting, validation, and formatting agree exactly with a real CDN parser.
+A live playground for the library is available at
+[https://cbor.tech/cbor/](https://cbor.tech/cbor/).
 
 ![CDN syntax highlighting in Visual Studio Code](images/example-cdn.png)
 

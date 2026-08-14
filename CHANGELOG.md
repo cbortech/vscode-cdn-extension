@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.27.0
 
 - Update `@cbortech/cbor` (and the `hash-extension`/`uuid-extension`/
   `set-map-extensions` companions) to 0.27.0.
