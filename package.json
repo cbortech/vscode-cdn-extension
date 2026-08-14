@@ -311,7 +311,7 @@
     "@vitest/coverage-v8": "^4.1.10",
     "@vscode/vsce": "^3.9.2",
     "prettier": "^3.9.6",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.2",
     "vite": "^8.2.1",
     "vitest": "^4.1.10"
   }
