@@ -1,7 +1,7 @@
 {
   "name": "vscode-cdn-extension",
   "displayName": "CDN (CBOR-EDN)",
-  "version": "0.26.8",
+  "version": "0.27.0",
   "description": "Language support for CDN (CBOR-EDN): syntax highlighting, validation, and formatting.",
   "keywords": [
     "cbor",
