@@ -117,7 +117,7 @@ export function activate(context: vscode.ExtensionContext): void {
           commas: config.get('format.commas', 'comma'),
           comments: config.get('format.comments', 'preserve'),
           encodingIndicators: config.get('format.encodingIndicators', 'auto'),
-          appStrings: config.get<boolean>('format.appStrings', true),
+          appPrefix: config.get<boolean>('format.appPrefix', true),
           bstrEncoding: config.get('format.bstrEncoding', 'hex'),
           preserveByteString: config.get<boolean>(
             'format.preserveByteString',
@@ -131,8 +131,8 @@ export function activate(context: vscode.ExtensionContext): void {
             'format.preserveNumberFormat',
             true
           ),
-          preserveAppSequence: config.get<boolean>(
-            'format.preserveAppSequence',
+          preserveAppPrefix: config.get<boolean>(
+            'format.preserveAppPrefix',
             true
           ),
           preserveBlankLines: config.get<boolean>(
@@ -148,6 +148,18 @@ export function activate(context: vscode.ExtensionContext): void {
           inlineLeafContainers: config.get<boolean>(
             'format.inlineLeafContainers',
             true
+          ),
+          // No JS-side default: an explicit 'decimal'/'hex' opts a
+          // float'…' literal out of its bit-pattern-preserving round trip
+          // (see FormatSettings.floatFormat), so leaving the setting
+          // untouched must stay `undefined`, not silently become 'decimal'.
+          floatFormat: config.get<'decimal' | 'hex' | 'app-extension'>(
+            'format.floatFormat'
+          ),
+          modernConcat: config.get<boolean>('format.modernConcat', false),
+          modernStreamSyntax: config.get<boolean>(
+            'format.modernStreamSyntax',
+            false
           ),
           extensions: readExtensionSettings(config),
         };

@@ -7,17 +7,22 @@ const defaults: FormatSettings = {
   commas: 'comma',
   comments: 'preserve',
   encodingIndicators: 'auto',
-  appStrings: true,
+  appPrefix: true,
   bstrEncoding: 'hex',
   preserveByteString: true,
   preserveRawString: true,
   preserveNumberFormat: true,
-  preserveAppSequence: true,
+  preserveAppPrefix: true,
   preserveBlankLines: true,
   preserveConcatenation: true,
   splitCdn: true,
   splitNewline: true,
   inlineLeafContainers: true,
+  // floatFormat is intentionally left unset: it's the safe default (see
+  // FormatSettings.floatFormat) — an explicit 'decimal' here would
+  // renormalize every float'…' literal, losing non-canonical bit patterns.
+  modernConcat: false,
+  modernStreamSyntax: false,
 };
 
 describe('formatCdn (item mode)', () => {
@@ -160,17 +165,17 @@ describe('formatCdn (extension literals and string options)', () => {
     ).toBe('26\n');
   });
 
-  it('keeps app-sequence notation when preserveAppSequence is on', () => {
+  it('keeps app-sequence notation when preserveAppPrefix is on', () => {
     expect(formatCdn("DT<<'1969-07-21T02:56:16Z'>>", defaults)).toBe(
       "DT<<'1969-07-21T02:56:16Z'>>\n"
     );
   });
 
-  it('normalizes app-sequence notation when preserveAppSequence is off', () => {
+  it('normalizes app-sequence notation when preserveAppPrefix is off', () => {
     expect(
       formatCdn("DT<<'1969-07-21T02:56:16Z'>>", {
         ...defaults,
-        preserveAppSequence: false,
+        preserveAppPrefix: false,
       })
     ).toBe("DT'1969-07-21T02:56:16Z'\n");
   });
@@ -194,6 +199,49 @@ describe('formatCdn (extension literals and string options)', () => {
       splitNewline: true,
     });
     expect(out).toBe('"line1\\n" +\n  "line2"\n');
+  });
+
+  it('emits float app-string notation when floatFormat is app-extension', () => {
+    // preserveNumberFormat takes precedence over floatFormat for a literal
+    // parsed from CDN text, so it must be off to see floatFormat applied.
+    expect(
+      formatCdn('1.5', {
+        ...defaults,
+        preserveNumberFormat: false,
+        floatFormat: 'app-extension',
+      })
+    ).toBe("float'3e00'\n");
+  });
+
+  it('keeps a float app-string literal byte-for-byte by default (floatFormat unset)', () => {
+    // A non-canonical NaN payload has no decimal spelling, so an unwanted
+    // 'decimal' default here would silently collapse it to plain `NaN`.
+    expect(formatCdn("float'7e01'", defaults)).toBe("float'7e01'\n");
+  });
+
+  it('refuses to format when floatFormat: decimal would lose a float app-string NaN payload', () => {
+    // 'decimal' has no spelling for a specific NaN payload — every NaN
+    // renders as plain `NaN` — so the round-trip guard must catch this and
+    // return null (no edit) rather than silently applying a data-changing
+    // rewrite.
+    expect(
+      formatCdn("float'7e01'", { ...defaults, floatFormat: 'decimal' })
+    ).toBeNull();
+  });
+
+  it('renders preserved concatenation as t1<<…>> when modernConcat is on', () => {
+    expect(formatCdn('"a" + "b"', { ...defaults, modernConcat: true })).toBe(
+      't1<<"a", "b">>\n'
+    );
+  });
+
+  it('renders indefinite-length strings as ilbs<<…>> when modernStreamSyntax is on', () => {
+    expect(
+      formatCdn("(_ h'0102', h'030405')", {
+        ...defaults,
+        modernStreamSyntax: true,
+      })
+    ).toBe("ilbs<<h'0102', h'030405'>>\n");
   });
 });
 
