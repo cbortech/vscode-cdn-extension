@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+- Update `@cbortech/cbor` (and the `hash-extension`/`uuid-extension`/
+  `set-map-extensions` companions) to 0.27.0.
+- **Breaking**: renamed formatter settings to match the library's
+  draft-ietf-cbor-edn-literals-27 `app-prefix` terminology — update your
+  settings if you use these:
+  - `cdn.format.appStrings` → `cdn.format.appPrefix`
+  - `cdn.format.preserveAppSequence` → `cdn.format.preserveAppPrefix`
+- New formatter setting `cdn.format.floatFormat` (`decimal` / `hex` /
+  `app-extension`, unset by default): the new `app-extension` value emits
+  `float'…'` notation carrying the value's exact IEEE 754 bit pattern,
+  including NaN payloads and ±Infinity. Left unset, a `float'…'` literal
+  keeps its original bit-pattern spelling; explicit `decimal`/`hex`
+  renormalizes it and can lose a non-canonical bit pattern such as a NaN
+  payload, so the formatter's round-trip guard now refuses to apply that
+  rewrite rather than silently changing the data.
+- New formatter settings `cdn.format.modernConcat` and
+  `cdn.format.modernStreamSyntax` (both default off): render preserved `+`
+  concatenation/elision chains and indefinite-length strings using
+  `t1<<…>>`/`b1<<…>>`/`ilts<<…>>`/`ilbs<<…>>` app-sequence notation instead
+  of the legacy `+` and `(_ ...)` forms.
+- `dt`/`ip`/`t1`/`b1` mandatory-to-implement references updated to
+  draft-ietf-cbor-edn-literals-27 §3.
+
 ## 0.26.5
 
 - Update `@cbortech/cbor` to 0.26.5.

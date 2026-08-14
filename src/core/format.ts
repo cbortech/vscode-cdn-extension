@@ -23,15 +23,16 @@ export interface FormatSettings {
   commas: 'comma' | 'none' | 'trailing';
   comments: 'preserve' | 'c-style' | 'cdn-style' | 'strip';
   encodingIndicators: 'always' | 'auto' | 'never';
-  appStrings: boolean;
+  /** Prefer app-prefix notation (`dt'…'`, `dt<<…>>`) over raw tag notation. */
+  appPrefix: boolean;
   bstrEncoding: 'hex' | 'base64' | 'base64url';
   preserveByteString: boolean;
   /** Keep the original spelling of raw backtick string literals. */
   preserveRawString: boolean;
   /** Keep the original spelling of integer and floating-point literals. */
   preserveNumberFormat: boolean;
-  /** Keep the original notation (quoting/bracketing/raw tag) of extension application literals. */
-  preserveAppSequence: boolean;
+  /** Keep the original notation (quoting/bracketing/raw tag) of extension app-prefix literals. */
+  preserveAppPrefix: boolean;
   /** Re-emit a blank line above an entry that had one in the source. */
   preserveBlankLines: boolean;
   /** Keep `"a" + "b"` concatenation chains from the source. */
@@ -42,6 +43,20 @@ export interface FormatSettings {
   splitNewline: boolean;
   /** Keep containers without nested containers on one line, e.g. `[1, 2, 3]`. */
   inlineLeafContainers: boolean;
+  /**
+   * Numeric format for floating-point values. Only takes effect where the
+   * original spelling isn't otherwise being kept: for a plain decimal/hex
+   * float literal, `preserveNumberFormat` wins whenever it's on; for a
+   * `float'…'` app-string literal, leaving this unset (or `'app-extension'`)
+   * keeps its original bit-pattern spelling, while `'decimal'`/`'hex'`
+   * actively renormalizes it, which loses non-canonical bit patterns like a
+   * NaN payload. Leave unset for the safe default; opt in explicitly.
+   */
+  floatFormat?: 'decimal' | 'hex' | 'app-extension';
+  /** Render `+` concatenation / elision chains as `t1<<…>>` / `b1<<…>>` app-sequence notation. */
+  modernConcat: boolean;
+  /** Render indefinite-length strings as `ilts<<…>>` / `ilbs<<…>>` app-sequence notation. */
+  modernStreamSyntax: boolean;
   /** Per-extension enable/disable state; missing entries mean enabled. */
   extensions?: ExtensionSettings;
 }
@@ -61,16 +76,15 @@ export function formatCdn(text: string, s: FormatSettings): string | null {
   };
   const toOptions: ToCDNOptions = {
     indent: s.indent,
-    preserveComments:
-      s.comments === 'preserve'
-        ? true
-        : s.comments === 'strip'
-          ? false
-          : s.comments,
+    // preserveComments is the verbatim switch; comments picks the
+    // normalized marker style when it's off (the deprecated string-valued
+    // preserveComments shorthand collapsed both into one option).
+    preserveComments: s.comments === 'preserve',
+    comments: s.comments === 'preserve' ? undefined : s.comments,
     preserveByteString: s.preserveByteString,
     preserveRawString: s.preserveRawString,
     preserveNumberFormat: s.preserveNumberFormat,
-    preserveAppSequence: s.preserveAppSequence,
+    preserveAppPrefix: s.preserveAppPrefix,
     preserveBlankLines: s.preserveBlankLines,
     preserveConcatenation: s.preserveConcatenation,
     splitCdn: s.splitCdn,
@@ -78,8 +92,11 @@ export function formatCdn(text: string, s: FormatSettings): string | null {
     inlineLeafContainers: s.inlineLeafContainers,
     commas: s.commas,
     encodingIndicators: s.encodingIndicators,
-    appStrings: s.appStrings,
+    appPrefix: s.appPrefix,
     bstrEncoding: s.bstrEncoding,
+    floatFormat: s.floatFormat,
+    modernConcat: s.modernConcat,
+    modernStreamSyntax: s.modernStreamSyntax,
   };
 
   let formatted: string;
@@ -144,7 +161,19 @@ function verifyRoundTrip(
   // settings; comments are stripped from the comparison on purpose. Both
   // sides must be parsed with the same extension set as the formatting pass,
   // otherwise extension literals would compare as different node types.
-  const canonicalOptions: ToCDNOptions = { encodingIndicators: 'always' };
+  // floatFormat is pinned to 'app-extension' (not 'decimal'): it derives its
+  // spelling from the value's actual encoded bytes rather than its source
+  // text, so it renders deterministically regardless of whether either side
+  // happens to carry a float'...' source spelling (avoiding a false
+  // mismatch when `floatFormat: 'app-extension'` turns a plain-decimal
+  // original into float'...' notation) — and, unlike 'decimal', it also
+  // keeps NaN payloads and ±Infinity distinguishable, so a lossy rewrite
+  // that collapses two different NaN payloads to the same "NaN" text is
+  // still caught as a mismatch here.
+  const canonicalOptions: ToCDNOptions = {
+    encodingIndicators: 'always',
+    floatFormat: 'app-extension',
+  };
   const parseOptions: FromCDNOptions = {
     strict: false,
     silent: true,
@@ -173,7 +202,7 @@ function verifyRoundTrip(
     // preserveComments are on, so only check comment counts in that case.
     if (
       s.comments === 'preserve' &&
-      (s.preserveByteString || s.preserveAppSequence)
+      (s.preserveByteString || s.preserveAppPrefix)
     ) {
       if (commentCount(formatted) < commentCount(original)) return false;
     }

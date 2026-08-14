@@ -124,10 +124,10 @@
           "default": "auto",
           "description": "Whether the formatter emits CBOR encoding-width indicators (_N)."
         },
-        "cdn.format.appStrings": {
+        "cdn.format.appPrefix": {
           "type": "boolean",
           "default": true,
-          "description": "Prefer application-oriented literal notation (e.g. dt'2023-01-01T00:00:00Z') over raw tag notation when formatting."
+          "description": "Prefer app-prefix literal notation (e.g. dt'2023-01-01T00:00:00Z') over raw tag notation when formatting."
         },
         "cdn.format.bstrEncoding": {
           "type": "string",
@@ -154,10 +154,10 @@
           "default": true,
           "description": "Keep the original spelling of integer and floating-point literals (base, digit spelling, exponent form) when formatting."
         },
-        "cdn.format.preserveAppSequence": {
+        "cdn.format.preserveAppPrefix": {
           "type": "boolean",
           "default": true,
-          "description": "Keep the original notation (e.g. dt'…' vs DT<<…>> vs raw tag) of extension application literals instead of normalizing to prefix'…' form."
+          "description": "Keep the original notation (e.g. dt'…' vs DT<<…>> vs raw tag) of extension app-prefix literals instead of normalizing to prefix'…' form."
         },
         "cdn.format.preserveBlankLines": {
           "type": "boolean",
@@ -184,15 +184,39 @@
           "default": true,
           "description": "Keep arrays/maps that contain no nested containers on a single line (e.g. [1, 2, 3]) when formatting."
         },
+        "cdn.format.floatFormat": {
+          "type": "string",
+          "enum": [
+            "decimal",
+            "hex",
+            "app-extension"
+          ],
+          "enumDescriptions": [
+            "Standard decimal notation (e.g. 1.5). Actively renormalizes a float'…' literal, losing a non-canonical bit pattern such as a NaN payload.",
+            "C99-style hex float notation (e.g. 0x1.8p+0). Also renormalizes a float'…' literal away from its bit-pattern spelling.",
+            "float'…' app-string notation carrying the exact IEEE 754 bit pattern, including NaN payloads and ±Infinity."
+          ],
+          "description": "Numeric format for floating-point values. Only takes effect where the original spelling isn't otherwise kept: a plain decimal/hex float literal follows this setting only when cdn.format.preserveNumberFormat is off, and a float'…' app-string literal keeps its original bit-pattern spelling unless this is explicitly set to decimal or hex. Leave unset for that safe default."
+        },
+        "cdn.format.modernConcat": {
+          "type": "boolean",
+          "default": false,
+          "description": "Render `+` string concatenation and elision (...) chains using t1<<…>>/b1<<…>> app-sequence notation instead of the legacy `+` operator."
+        },
+        "cdn.format.modernStreamSyntax": {
+          "type": "boolean",
+          "default": false,
+          "description": "Render indefinite-length strings using ilts<<…>>/ilbs<<…>> app-sequence notation instead of the legacy (_ \"a\", \"b\") streamstring form."
+        },
         "cdn.extensions.dt": {
           "type": "boolean",
           "default": true,
-          "description": "Enable dt'…'/DT'…' date-time literals (tags 1/0). Mandatory-to-implement per draft-ietf-cbor-edn-literals-26 §2.1."
+          "description": "Enable dt'…'/DT'…' date-time literals (tags 1/0). Mandatory-to-implement per draft-ietf-cbor-edn-literals-27 §3."
         },
         "cdn.extensions.ip": {
           "type": "boolean",
           "default": true,
-          "description": "Enable ip'…'/IP'…' IP address/prefix literals (tags 52/54). Mandatory-to-implement per draft-ietf-cbor-edn-literals-26 §2.1."
+          "description": "Enable ip'…'/IP'…' IP address/prefix literals (tags 52/54). Mandatory-to-implement per draft-ietf-cbor-edn-literals-27 §3."
         },
         "cdn.extensions.cri": {
           "type": "boolean",
@@ -202,12 +226,12 @@
         "cdn.extensions.t1": {
           "type": "boolean",
           "default": true,
-          "description": "Enable t1'…' interoperable text literals. Mandatory-to-implement per draft-ietf-cbor-edn-literals-26 §2.1."
+          "description": "Enable t1'…' interoperable text literals. Mandatory-to-implement per draft-ietf-cbor-edn-literals-27 §3."
         },
         "cdn.extensions.b1": {
           "type": "boolean",
           "default": true,
-          "description": "Enable b1'…' byte-string literals. Mandatory-to-implement per draft-ietf-cbor-edn-literals-26 §2.1."
+          "description": "Enable b1'…' byte-string literals. Mandatory-to-implement per draft-ietf-cbor-edn-literals-27 §3."
         },
         "cdn.extensions.ilbs": {
           "type": "boolean",
