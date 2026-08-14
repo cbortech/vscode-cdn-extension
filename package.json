@@ -276,10 +276,10 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@cbortech/cbor": "^0.26.8",
-    "@cbortech/hash-extension": "^0.2.3",
-    "@cbortech/set-map-extensions": "^0.1.0",
-    "@cbortech/uuid-extension": "^0.26.8"
+    "@cbortech/cbor": "^0.27.0",
+    "@cbortech/hash-extension": "^0.27.0",
+    "@cbortech/set-map-extensions": "^0.27.0",
+    "@cbortech/uuid-extension": "^0.27.0"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
@@ -288,7 +288,7 @@
     "@vscode/vsce": "^3.9.2",
     "prettier": "^3.9.6",
     "typescript": "^5.9.3",
-    "vite": "^8.1.5",
+    "vite": "^8.2.1",
     "vitest": "^4.1.10"
   }
 }
