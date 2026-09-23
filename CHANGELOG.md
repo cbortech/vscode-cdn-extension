@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.27.2
+
+- Update `@cbortech/cbor` to 0.27.2.
+- `e'…'` external-reference literals (draft-ietf-cbor-edn-e-ref) are now
+  reported with an informational hint: they need a CDDL schema to resolve
+  names against, which this extension does not support, so they are parsed
+  as unresolved (tag 999).
+- Formatter: an unresolved single-word app-string literal (e.g. `e'alg'`) no
+  longer forces its enclosing array/map onto multiple lines under
+  `cdn.format.inlineLeafContainers`.
+- Formatter: subnormal floats rendered in hex (`cdn.format.floatFormat: hex`)
+  now use normalized notation (e.g. `0x1p-1023` instead of `0x0.8p-1022`).
+
 ## 0.27.0
 
 - Update `@cbortech/cbor` (and the `hash-extension`/`uuid-extension`/

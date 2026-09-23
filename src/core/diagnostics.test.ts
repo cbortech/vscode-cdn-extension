@@ -126,6 +126,15 @@ describe('validateCdn (extensions)', () => {
     expect(diags[0].message).toMatch(/builtinExtensions/);
   });
 
+  it('hints that e-ref literals are unsupported without a CDDL schema', () => {
+    const diags = validateCdn("[e'foo', 1]", 'item');
+    expect(diags).toHaveLength(1);
+    expect(diags[0].severity).toBe('info');
+    expect(diags[0].message).toMatch(/draft-ietf-cbor-edn-e-ref/);
+    expect(diags[0].message).not.toMatch(/'cddl' option/);
+    expect([diags[0].start, diags[0].end]).toEqual([1, 7]);
+  });
+
   it('disabling one extension leaves the others active', () => {
     expect(
       validateCdn("ip'10.0.0.1'", 'item', { uuid: false, set: false })
