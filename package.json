@@ -300,19 +300,19 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@cbortech/cbor": "^0.27.0",
+    "@cbortech/cbor": "^0.27.2",
     "@cbortech/hash-extension": "^0.27.0",
     "@cbortech/set-map-extensions": "^0.27.0",
     "@cbortech/uuid-extension": "^0.27.0"
   },
   "devDependencies": {
-    "@types/node": "^24.13.3",
+    "@types/node": "^24.13.6",
     "@types/vscode": "1.85.0",
-    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/coverage-v8": "^4.1.11",
     "@vscode/vsce": "^3.9.2",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.8",
     "typescript": "^7.0.2",
-    "vite": "^8.2.1",
-    "vitest": "^4.1.10"
+    "vite": "^8.3.0",
+    "vitest": "^4.1.11"
   }
 }
