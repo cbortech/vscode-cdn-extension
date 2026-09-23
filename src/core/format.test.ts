@@ -243,6 +243,12 @@ describe('formatCdn (extension literals and string options)', () => {
       })
     ).toBe("ilbs<<h'0102', h'030405'>>\n");
   });
+
+  // @cbortech/cbor 0.27.2: an unresolved app-string (e.g. e'…' without a
+  // CDDL schema) counts as a leaf, not as the [prefix, text] array it wraps.
+  it('keeps unresolved single-word app-string literals inline', () => {
+    expect(formatCdn("[e'alg',1]", defaults)).toBe("[e'alg', 1]\n");
+  });
 });
 
 describe('formatCdn (sequence mode)', () => {

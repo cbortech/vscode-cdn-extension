@@ -164,13 +164,24 @@ function collectDisabledExtensionDiagnostics(
   return found;
 }
 
+/**
+ * Library hint for `e'…'` (draft-ietf-cbor-edn-e-ref). Its advice — pass the
+ * `cddl` option — targets library callers; this extension has no CDDL schema
+ * to supply, so `e'…'` can never resolve here and the hint is reworded.
+ */
+const EREF_HINT_PREFIX = "app-string prefix 'e' ";
+const EREF_HINT_MESSAGE =
+  "app-string prefix 'e' (external reference, draft-ietf-cbor-edn-e-ref) needs a CDDL schema to resolve names against, which this extension does not support; it is parsed as unresolved (tag 999)";
+
 function warningToDiagnostic(w: ParseWarning, text: string): CdnDiagnostic {
   // A fatal warning means non-strict sequence parsing abandoned the rest of
   // the input: everything after it is unanalyzed, not clean. Surface it as an
   // error and say so, since no further diagnostics will follow it.
   const message = w.fatal
     ? `${w.message} (the rest of the document was not parsed)`
-    : w.message;
+    : w.hint && w.message.startsWith(EREF_HINT_PREFIX)
+      ? EREF_HINT_MESSAGE
+      : w.message;
   return {
     message,
     severity: w.fatal ? 'error' : w.hint ? 'info' : 'warning',
